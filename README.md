@@ -1,6 +1,6 @@
 # panyue48.github.io
 
-# Resume - 可视化数据驱动简历生成器
+# LiveResume - 可视化数据驱动简历生成器
 
 ![Vue3](https://img.shields.io/badge/Vue-3.x-4FC08D?style=flat-square&logo=vue.js)
 ![Element Plus](https://img.shields.io/badge/Element_Plus-2.x-409EFF?style=flat-square&logo=element)
