@@ -6,7 +6,7 @@
 ![Element Plus](https://img.shields.io/badge/Element_Plus-2.x-409EFF?style=flat-square&logo=element)
 ![ECharts](https://img.shields.io/badge/ECharts-5.x-AA344D?style=flat-square&logo=apache-echarts)
 
-> 一个基于 Vue 3 Composition API 构建的响应式简历生成系统，结合数学建模数据可视化
+> 一个基于 Vue 3 Composition API 构建的响应式简历生成系统
 
 ## 🛠 技术架构 (Tech Stack)
 
