@@ -13,56 +13,225 @@
     <script src="https://unpkg.com/@element-plus/icons-vue"></script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- ECharts -->
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --el-color-primary: #3b82f6;
+            --el-color-primary: #2c3e50;
             --a4-height: 297mm;
             --a4-width: 210mm;
+            --sidebar-bg: #f8f9fa;
+            --accent-color: #3498db;
+            --page-padding-top: 0mm;
+            --page-padding-bottom: 12mm;
         }
         body {
             font-family: 'Noto Sans SC', sans-serif;
-            background-color: #f3f4f6;
+            background-color: #e5e7eb;
             margin: 0;
             padding: 0;
         }
 
-        /* 模拟 A4 纸张效果 - 优化分页显示 */
-        .a4-paper {
+        /* A4 纸张容器 */
+        .a4-container {
             width: var(--a4-width);
-            min-height: var(--a4-height);
+            margin: 0 auto;
+        }
+
+        /* 单页 A4 纸 */
+        .a4-page {
+            width: var(--a4-width);
+            height: var(--a4-height);
             background-color: white;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin: 0 auto;
-            padding: 20mm;
+            margin-bottom: 20px;
             box-sizing: border-box;
             position: relative;
-            transition: height 0.3s;
-            
-            /* 关键：使用渐变背景模拟分页线 */
-            background-image: linear-gradient(to bottom, transparent calc(297mm - 1px), #e5e7eb calc(297mm - 1px), #e5e7eb 297mm);
-            background-size: 100% 297mm; /* 背景循环大小为一页高度 */
-            background-repeat: repeat-y;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* 这是一个视觉提示，告诉用户这里是分页处 */
-        .page-break-marker {
+        .a4-page:last-child {
+            margin-bottom: 0;
+        }
+
+        /* 页码标记 */
+        .page-number {
             position: absolute;
-            left: -20px;
-            width: 10px;
-            border-top: 1px dashed #999;
+            bottom: 8mm;
+            right: 10mm;
             font-size: 10px;
-            color: #999;
+            color: #adb5bd;
         }
 
-        /* 防止打印时项目被切断 */
-        .print-no-break {
-            break-inside: avoid;
+        /* 简历头部样式 */
+        .resume-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 24px 28px;
+        }
+
+        /* 简历侧边栏 */
+        .resume-sidebar {
+            background-color: var(--sidebar-bg);
+            padding: 20px;
+            font-size: 13px;
+        }
+
+        /* 简历主内容区 */
+        .resume-main {
+            padding: 20px 24px;
+            padding-bottom: 40px; /* 增加底部padding确保留白 */
+            font-size: 13px;
+        }
+
+        /* 分割线样式 */
+        .section-divider {
+            border: none;
+            border-top: 1px solid #dee2e6;
+            margin: 16px 0;
+        }
+
+        /* 侧边栏标题 */
+        .sidebar-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #2c3e50;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        /* 主内容标题 */
+        .main-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .main-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: var(--accent-color);
+            border-radius: 2px;
+        }
+
+        /* 联系方式项 */
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: #495057;
+        }
+
+        .contact-icon {
+            width: 18px;
+            text-align: center;
+            color: var(--accent-color);
+        }
+
+        /* 技能标签 */
+        .skill-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+
+        .skill-bullet {
+            width: 6px;
+            height: 6px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        /* 工作/项目经历卡片 */
+        .experience-card {
+            margin-bottom: 18px;
             page-break-inside: avoid;
+        }
+
+        .experience-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 4px;
+        }
+
+        .company-name {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .company-location {
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        .position-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 8px;
+        }
+
+        .position-title {
+            color: var(--accent-color);
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .position-time {
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        .experience-desc {
+            color: #495057;
+            line-height: 1.6;
+        }
+
+        .experience-desc li {
+            margin-bottom: 4px;
+            position: relative;
+            padding-left: 12px;
+        }
+
+        .experience-desc li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* 优势列表 */
+        .advantage-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            color: #495057;
+            line-height: 1.5;
+        }
+
+        .advantage-bullet {
+            color: var(--accent-color);
+            margin-right: 8px;
+            font-weight: bold;
         }
 
         /* 编辑侧边栏样式 */
@@ -78,26 +247,35 @@
             body { background: white; }
             .no-print { display: none !important; }
             .editor-sidebar { display: none; }
-            
-            /* 打印容器调整 */
-            .flex-1.bg-gray-200 { 
-                display: block; 
-                height: auto; 
-                overflow: visible; 
+
+            .flex-1.bg-gray-200 {
+                display: block;
+                height: auto;
+                overflow: visible;
                 padding: 0;
             }
 
-            .a4-paper {
+            .a4-container {
+                width: 100%;
+            }
+
+            .a4-page {
                 box-shadow: none;
                 margin: 0;
                 width: 100%;
-                min-height: auto; /* 打印时由内容决定高度 */
-                height: auto !important;
-                padding: 10mm; 
-                background-image: none !important; /* 打印时不显示分页线 */
+                height: auto;
+                page-break-after: always;
+                overflow: visible;
             }
 
-            /* 强制背景色打印 */
+            .a4-page:last-child {
+                page-break-after: avoid;
+            }
+
+            .page-number {
+                display: none;
+            }
+
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
@@ -107,13 +285,16 @@
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
-        
-        .skill-tag { margin-right: 6px; margin-bottom: 6px; }
+
+        .print-no-break {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
     </style>
 </head>
 <body>
     <div id="app" class="h-screen flex flex-col md:flex-row overflow-hidden">
-        
+
         <!-- 左侧：控制面板 (编辑区) -->
         <div class="editor-sidebar w-full md:w-1/3 lg:w-1/4 p-6 flex-shrink-0 z-10 no-print">
             <div class="flex items-center justify-between mb-6">
@@ -126,9 +307,9 @@
             </div>
 
             <el-alert
-                title="自动分页模式"
+                title="双栏简历模板"
                 type="info"
-                description="右侧预览已启用自动高度。灰色横线表示打印分页位置。请确保关键内容不被横线切断。"
+                description="左侧为关键信息区，右侧为详细经历区。灰色横线表示打印分页位置。"
                 show-icon
                 :closable="false"
                 class="mb-4"
@@ -136,65 +317,103 @@
 
             <el-collapse v-model="activeCollapse">
                 <!-- 基本信息 -->
-                <el-collapse-item title="基本信息 / Base Info" name="1">
+                <el-collapse-item title="基本信息" name="1">
                     <el-form label-position="top" size="small">
                         <el-form-item label="姓名">
                             <el-input v-model="resume.base.name"></el-input>
                         </el-form-item>
-                        <el-form-item label="求职意向">
-                            <el-input v-model="resume.base.job"></el-input>
+                        <el-form-item label="目标职位/专业定位">
+                            <el-input v-model="resume.base.title"></el-input>
                         </el-form-item>
-                        <el-form-item label="电话">
+                        <el-form-item label="手机号码">
                             <el-input v-model="resume.base.phone"></el-input>
                         </el-form-item>
-                        <el-form-item label="邮箱">
+                        <el-form-item label="电子邮箱">
                             <el-input v-model="resume.base.email"></el-input>
                         </el-form-item>
-                        <el-form-item label="个人简介">
-                            <el-input type="textarea" :rows="4" v-model="resume.base.summary"></el-input>
+                        <el-form-item label="所在城市">
+                            <el-input v-model="resume.base.location"></el-input>
+                        </el-form-item>
+                        <el-form-item label="个人链接 (LinkedIn/Github)">
+                            <el-input v-model="resume.base.link"></el-input>
                         </el-form-item>
                     </el-form>
                 </el-collapse-item>
 
-                <!-- 能力雷达 -->
-                <el-collapse-item title="能力建模 / Skills Model" name="2">
-                    <div class="text-xs text-gray-500 mb-2">修改数值实时更新雷达图</div>
-                    <el-form label-position="left" label-width="100px" size="small">
-                        <el-form-item v-for="(val, key) in resume.radar" :key="key" :label="key">
-                            <el-slider v-model="resume.radar[key]" :max="100" @input="updateChart"></el-slider>
-                        </el-form-item>
-                    </el-form>
-                </el-collapse-item>
-
-                <!-- 技术栈 -->
-                <el-collapse-item title="技术栈 / Tech Stack" name="3">
-                    <el-input 
-                        v-model="newSkill" 
-                        placeholder="输入技能回车添加" 
-                        size="small"
-                        @keyup.enter="addSkill"
-                        class="mb-2"
-                    >
-                        <template #append><el-button @click="addSkill">+</el-button></template>
-                    </el-input>
-                    <div class="flex flex-wrap">
-                        <el-tag 
-                            v-for="(tag, index) in resume.skills" 
-                            :key="index" 
-                            closable 
-                            class="skill-tag"
-                            type="info"
-                            @close="removeSkill(index)"
-                        >
-                            {{ tag }}
-                        </el-tag>
+                <!-- 个人优势 -->
+                <el-collapse-item title="个人优势/职业总结" name="2">
+                    <el-button type="primary" plain size="small" class="w-full mb-3" @click="addAdvantage">
+                        + 添加优势
+                    </el-button>
+                    <div v-for="(item, idx) in resume.advantages" :key="idx" class="mb-2">
+                        <div class="flex gap-2">
+                            <el-input v-model="resume.advantages[idx]" size="small" placeholder="描述核心竞争力"></el-input>
+                            <el-button type="danger" size="small" @click="removeAdvantage(idx)">删</el-button>
+                        </div>
                     </div>
                 </el-collapse-item>
 
-                <!-- 经历管理 -->
-                <el-collapse-item title="项目经历 / Projects" name="4">
+                <!-- 核心技能 -->
+                <el-collapse-item title="核心技能 (Hard Skills)" name="3">
+                    <el-button type="primary" plain size="small" class="w-full mb-3" @click="addSkill">
+                        + 添加技能
+                    </el-button>
+                    <div v-for="(item, idx) in resume.skills" :key="idx" class="mb-2">
+                        <div class="flex gap-2">
+                            <el-input v-model="resume.skills[idx]" size="small" placeholder="技能名称"></el-input>
+                            <el-button type="danger" size="small" @click="removeSkill(idx)">删</el-button>
+                        </div>
+                    </div>
+                </el-collapse-item>
+
+                <!-- 工具/软件 -->
+                <el-collapse-item title="工具/软件" name="4">
+                    <el-button type="primary" plain size="small" class="w-full mb-3" @click="addTool">
+                        + 添加工具
+                    </el-button>
+                    <div v-for="(item, idx) in resume.tools" :key="idx" class="mb-2">
+                        <div class="flex gap-2">
+                            <el-input v-model="resume.tools[idx]" size="small" placeholder="工具名称"></el-input>
+                            <el-button type="danger" size="small" @click="removeTool(idx)">删</el-button>
+                        </div>
+                    </div>
+                </el-collapse-item>
+
+                <!-- 语言/证书 -->
+                <el-collapse-item title="语言能力/证书" name="5">
+                    <el-button type="primary" plain size="small" class="w-full mb-3" @click="addCert">
+                        + 添加语言/证书
+                    </el-button>
+                    <div v-for="(item, idx) in resume.certs" :key="idx" class="mb-2">
+                        <div class="flex gap-2">
+                            <el-input v-model="resume.certs[idx]" size="small" placeholder="如：英语CET-6"></el-input>
+                            <el-button type="danger" size="small" @click="removeCert(idx)">删</el-button>
+                        </div>
+                    </div>
+                </el-collapse-item>
+
+                <!-- 工作经历 -->
+                <el-collapse-item title="工作经历" name="6">
+                    <el-button type="primary" plain size="small" class="w-full mb-3" @click="addWork">
+                        + 添加工作经历
+                    </el-button>
+                    <div v-for="(work, idx) in resume.works" :key="idx" class="mb-4 p-3 bg-gray-50 rounded border border-gray-200">
+                        <div class="flex justify-between mb-2">
+                            <span class="font-bold text-xs text-gray-600">工作 #{{idx + 1}}</span>
+                            <el-button type="danger" link size="small" @click="removeWork(idx)">删除</el-button>
+                        </div>
+                        <el-input v-model="work.company" placeholder="公司名称" size="small" class="mb-1"></el-input>
+                        <el-input v-model="work.location" placeholder="所在地" size="small" class="mb-1"></el-input>
+                        <el-input v-model="work.position" placeholder="职位/头衔" size="small" class="mb-1"></el-input>
+                        <el-input v-model="work.time" placeholder="时间段 (如：2022.06 - 至今)" size="small" class="mb-1"></el-input>
+                        <el-input type="textarea" :rows="4" v-model="work.duties" placeholder="职责与成就 (每行一条，以动作动词开头)" size="small"></el-input>
+                    </div>
+                </el-collapse-item>
+
+                <!-- 项目经验 -->
+                <el-collapse-item title="项目经验" name="7">
                     <el-button type="primary" plain size="small" class="w-full mb-3" @click="addProject">
-                        + 添加新项目
+                        + 添加项目
                     </el-button>
                     <div v-for="(proj, idx) in resume.projects" :key="idx" class="mb-4 p-3 bg-gray-50 rounded border border-gray-200">
                         <div class="flex justify-between mb-2">
@@ -202,151 +421,154 @@
                             <el-button type="danger" link size="small" @click="removeProject(idx)">删除</el-button>
                         </div>
                         <el-input v-model="proj.name" placeholder="项目名称" size="small" class="mb-1"></el-input>
-                        <el-input v-model="proj.role" placeholder="担任角色" size="small" class="mb-1"></el-input>
-                        <el-input v-model="proj.time" placeholder="时间段" size="small" class="mb-1"></el-input>
-                        <el-input type="textarea" :rows="3" v-model="proj.desc" placeholder="项目描述" size="small"></el-input>
+                        <el-input v-model="proj.role" placeholder="项目角色" size="small" class="mb-1"></el-input>
+                        <el-input v-model="proj.time" placeholder="项目时间" size="small" class="mb-1"></el-input>
+                        <el-input v-model="proj.intro" placeholder="项目背景 (一句话介绍)" size="small" class="mb-1"></el-input>
+                        <el-input type="textarea" :rows="3" v-model="proj.desc" placeholder="核心任务与成果 (每行一条)" size="small"></el-input>
                     </div>
+                </el-collapse-item>
+
+                <!-- 教育背景 -->
+                <el-collapse-item title="教育背景" name="8">
+                    <el-form label-position="top" size="small">
+                        <el-form-item label="大学名称">
+                            <el-input v-model="resume.education.school"></el-input>
+                        </el-form-item>
+                        <el-form-item label="就读时间">
+                            <el-input v-model="resume.education.time" placeholder="如：2018.09 - 2022.06"></el-input>
+                        </el-form-item>
+                        <el-form-item label="学位">
+                            <el-input v-model="resume.education.degree" placeholder="如：本科/硕士"></el-input>
+                        </el-form-item>
+                        <el-form-item label="专业名称">
+                            <el-input v-model="resume.education.major"></el-input>
+                        </el-form-item>
+                        <el-form-item label="相关课程/GPA/荣誉 (可选)">
+                            <el-input type="textarea" :rows="2" v-model="resume.education.extra"></el-input>
+                        </el-form-item>
+                    </el-form>
                 </el-collapse-item>
             </el-collapse>
         </div>
 
         <!-- 右侧：预览区 (A4 纸张) -->
         <div class="flex-1 bg-gray-200 overflow-y-auto relative flex justify-center p-4 md:p-8" id="preview-container">
-            <!-- 这里的 style 动态绑定了高度，实现了自动拓展 -->
-            <div id="resume-content" class="a4-paper flex flex-col" :style="{ height: paperHeight }">
-                
-                <!-- 头部 -->
-                <header class="flex justify-between items-end border-b-2 border-gray-800 pb-6 mb-8">
-                    <div>
-                        <h1 class="text-4xl font-bold text-gray-900 tracking-wide mb-2">{{ resume.base.name }}</h1>
-                        <div class="text-xl text-blue-600 font-medium">{{ resume.base.job }}</div>
+
+            <!-- 隐藏的测量容器 - 放在body级别确保正确渲染 -->
+            <div id="measure-container" style="position: fixed; top: -9999px; left: -9999px; width: 210mm; visibility: hidden; pointer-events: none; z-index: -1;"></div>
+
+            <!-- A4 纸张容器 -->
+            <div class="a4-container">
+                <div v-for="(page, pageIdx) in pages" :key="pageIdx" class="a4-page">
+                    <!-- 第一页包含头部 -->
+                    <template v-if="pageIdx === 0">
+                        <header class="resume-header">
+                            <h1 class="text-2xl font-bold tracking-wide mb-1">{{ resume.base.name }}</h1>
+                            <div class="text-base opacity-90">{{ resume.base.title }}</div>
+                        </header>
+                    </template>
+
+                    <!-- 双栏内容区 -->
+                    <div class="flex" style="flex: 1; overflow: hidden;">
+                        <!-- 左侧边栏 -->
+                        <aside class="resume-sidebar" style="width: 35%; flex-shrink: 0; overflow: hidden;">
+                            <template v-if="pageIdx === 0">
+                                <!-- 联系方式 -->
+                                <div class="mb-5">
+                                    <h3 class="sidebar-title">联系方式</h3>
+                                    <div class="contact-item">
+                                        <span class="contact-icon">📞</span>
+                                        <span>{{ resume.base.phone }}</span>
+                                    </div>
+                                    <div class="contact-item">
+                                        <span class="contact-icon">📧</span>
+                                        <span>{{ resume.base.email }}</span>
+                                    </div>
+                                    <div class="contact-item">
+                                        <span class="contact-icon">📍</span>
+                                        <span>{{ resume.base.location }}</span>
+                                    </div>
+                                    <div class="contact-item" v-if="resume.base.link">
+                                        <span class="contact-icon">🔗</span>
+                                        <span>{{ resume.base.link }}</span>
+                                    </div>
+                                </div>
+
+                                <hr class="section-divider">
+
+                                <!-- 核心技能 -->
+                                <div class="mb-5">
+                                    <h3 class="sidebar-title">核心技能 (Hard Skills)</h3>
+                                    <div class="skill-item" v-for="(skill, idx) in getSidebarSkills(pageIdx)" :key="'skill-'+idx">
+                                        <span class="skill-bullet"></span>
+                                        <span>{{ skill }}</span>
+                                    </div>
+                                </div>
+
+                                <hr class="section-divider" v-if="getSidebarTools(pageIdx).length > 0">
+
+                                <!-- 工具/软件 -->
+                                <div class="mb-5" v-if="getSidebarTools(pageIdx).length > 0">
+                                    <h3 class="sidebar-title">工具/软件</h3>
+                                    <div class="skill-item" v-for="(tool, idx) in getSidebarTools(pageIdx)" :key="'tool-'+idx">
+                                        <span class="skill-bullet"></span>
+                                        <span>{{ tool }}</span>
+                                    </div>
+                                </div>
+
+                                <hr class="section-divider" v-if="getSidebarCerts(pageIdx).length > 0">
+
+                                <!-- 语言能力/证书 -->
+                                <div v-if="getSidebarCerts(pageIdx).length > 0">
+                                    <h3 class="sidebar-title">语言能力/证书</h3>
+                                    <div class="skill-item" v-for="(cert, idx) in getSidebarCerts(pageIdx)" :key="'cert-'+idx">
+                                        <span class="skill-bullet"></span>
+                                        <span>{{ cert }}</span>
+                                    </div>
+                                </div>
+                            </template>
+                            <!-- 后续页侧边栏显示溢出的内容 -->
+                            <template v-else>
+                                <div class="text-xs text-gray-400 italic mb-4">（续上页）</div>
+
+                                <!-- 显示溢出的技能 -->
+                                <div class="mb-5" v-if="getSidebarSkills(pageIdx).length > 0">
+                                    <h3 class="sidebar-title">核心技能（续）</h3>
+                                    <div class="skill-item" v-for="(skill, idx) in getSidebarSkills(pageIdx)" :key="'skill2-'+idx">
+                                        <span class="skill-bullet"></span>
+                                        <span>{{ skill }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- 显示溢出的工具 -->
+                                <div class="mb-5" v-if="getSidebarTools(pageIdx).length > 0">
+                                    <h3 class="sidebar-title">工具/软件（续）</h3>
+                                    <div class="skill-item" v-for="(tool, idx) in getSidebarTools(pageIdx)" :key="'tool2-'+idx">
+                                        <span class="skill-bullet"></span>
+                                        <span>{{ tool }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- 显示溢出的证书 -->
+                                <div v-if="getSidebarCerts(pageIdx).length > 0">
+                                    <h3 class="sidebar-title">语言能力/证书（续）</h3>
+                                    <div class="skill-item" v-for="(cert, idx) in getSidebarCerts(pageIdx)" :key="'cert2-'+idx">
+                                        <span class="skill-bullet"></span>
+                                        <span>{{ cert }}</span>
+                                    </div>
+                                </div>
+                            </template>
+                        </aside>
+
+                        <!-- 右侧主内容 -->
+                        <main class="resume-main" style="flex: 1; overflow: hidden;">
+                            <div v-html="page.content"></div>
+                        </main>
                     </div>
-                    <div class="text-right text-sm text-gray-600 space-y-1">
-                        <div class="flex items-center justify-end gap-2">
-                            <el-icon><Phone /></el-icon> {{ resume.base.phone }}
-                        </div>
-                        <div class="flex items-center justify-end gap-2">
-                            <el-icon><Message /></el-icon> {{ resume.base.email }}
-                        </div>
-                        <div class="flex items-center justify-end gap-2">
-                            <el-icon><Location /></el-icon> 北京 / 深圳 / 远程
-                        </div>
-                    </div>
-                </header>
 
-                <!-- 新布局：横向排列的三大模块 -->
-                <div class="grid grid-cols-3 gap-6 mb-8 pb-6 border-b border-gray-200 print-no-break">
-                    
-                    <!-- 1. 核心能力雷达图 -->
-                    <section>
-                        <h3 class="text-sm font-bold text-gray-800 border-l-4 border-blue-600 pl-2 mb-3 uppercase tracking-wider">
-                            能力分析 / Analysis
-                        </h3>
-                        <!-- ECharts 容器 -->
-                        <div id="radarChart" class="w-full h-[180px]"></div>
-                    </section>
-
-                    <!-- 2. 技术栈列表 -->
-                    <section>
-                        <h3 class="text-sm font-bold text-gray-800 border-l-4 border-blue-600 pl-2 mb-3 uppercase tracking-wider">
-                            技术栈 / Tech Stack
-                        </h3>
-                        <div class="flex flex-wrap gap-2 content-start">
-                            <span v-for="(skill, idx) in resume.skills" :key="idx" 
-                                class="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded border border-blue-100">
-                                {{ skill }}
-                            </span>
-                        </div>
-                    </section>
-
-                    <!-- 3. 软技能/优势 -->
-                    <section>
-                        <h3 class="text-sm font-bold text-gray-800 border-l-4 border-blue-600 pl-2 mb-3 uppercase tracking-wider">
-                            优势 / Strengths
-                        </h3>
-                        <div class="space-y-3 pt-1">
-                            <div>
-                                <div class="flex justify-between text-xs mb-1">
-                                    <span class="text-gray-600">数学建模思维</span>
-                                    <span class="font-bold text-blue-600">95%</span>
-                                </div>
-                                <el-progress :percentage="95" :show-text="false" :stroke-width="6"></el-progress>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-xs mb-1">
-                                    <span class="text-gray-600">算法与逻辑</span>
-                                    <span class="font-bold text-blue-600">88%</span>
-                                </div>
-                                <el-progress :percentage="88" :show-text="false" status="success" :stroke-width="6"></el-progress>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-xs mb-1">
-                                    <span class="text-gray-600">团队协作</span>
-                                    <span class="font-bold text-blue-600">90%</span>
-                                </div>
-                                <el-progress :percentage="90" :show-text="false" status="warning" :stroke-width="6"></el-progress>
-                            </div>
-                        </div>
-                    </section>
+                    <!-- 页码 -->
+                    <div class="page-number" v-if="pages.length > 1">{{ pageIdx + 1 }} / {{ pages.length }}</div>
                 </div>
-
-                <!-- 下方主体内容：个人简介、教育、项目 -->
-                <div class="space-y-8 flex-1">
-                    
-                    <!-- 个人简介 -->
-                    <section class="print-no-break">
-                        <h3 class="text-lg font-bold text-gray-800 border-b-2 border-gray-200 pb-2 mb-3 uppercase tracking-wider">
-                            个人简介 / Summary
-                        </h3>
-                        <p class="text-gray-600 leading-relaxed text-sm text-justify whitespace-pre-wrap">
-                            {{ resume.base.summary }}
-                        </p>
-                    </section>
-
-                    <!-- 教育背景 -->
-                    <section class="print-no-break">
-                        <h3 class="text-lg font-bold text-gray-800 border-b-2 border-gray-200 pb-2 mb-4 uppercase tracking-wider">
-                            教育背景 / Education
-                        </h3>
-                        <div class="flex justify-between items-baseline mb-1">
-                            <span class="font-bold text-gray-800 text-base">XX大学</span>
-                            <span class="text-sm text-gray-500">2021 - 2025</span>
-                        </div>
-                        <div class="flex justify-between text-sm mb-2">
-                            <span class="text-blue-600 font-medium">信息与计算科学 (本科)</span>
-                        </div>
-                        <ul class="list-disc list-inside text-sm text-gray-600 space-y-1 ml-1">
-                            <li>主修课程：数学分析、数据结构、算法导论、数值计算方法、Web开发技术</li>
-                            <li>成绩排名：前 10% | 曾获国家励志奖学金</li>
-                        </ul>
-                    </section>
-
-                    <!-- 项目经历 -->
-                    <section>
-                        <h3 class="text-lg font-bold text-gray-800 border-b-2 border-gray-200 pb-2 mb-4 uppercase tracking-wider">
-                            项目经历 / Projects
-                        </h3>
-                        <div class="relative border-l border-gray-300 ml-2 space-y-6">
-                            <!-- 添加 print-no-break 确保单个项目不跨页 -->
-                            <div v-for="(proj, idx) in resume.projects" :key="idx" class="ml-6 relative print-no-break">
-                                <!-- 时间轴点 -->
-                                <div class="absolute -left-[31px] top-1 w-3 h-3 bg-blue-600 rounded-full border-2 border-white"></div>
-                                
-                                <div class="flex justify-between items-baseline mb-1">
-                                    <h4 class="font-bold text-gray-800 text-base">{{ proj.name }}</h4>
-                                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{{ proj.time }}</span>
-                                </div>
-                                <div class="text-sm text-blue-600 mb-2 font-medium">{{ proj.role }}</div>
-                                <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{{ proj.desc }}</p>
-                            </div>
-                        </div>
-                    </section>
-                </div>
-
-                <!-- 底部 -->
-                <footer class="mt-auto pt-6 border-t border-gray-200 text-center text-xs text-gray-400">
-                    <p>Powered by Vue 3 & Element Plus | Generated by AlgoResume System</p>
-                </footer>
             </div>
         </div>
     </div>
@@ -357,202 +579,438 @@
 
         const app = createApp({
             setup() {
-                const activeCollapse = ref(['1', '2', '4']);
-                const newSkill = ref('');
-                let chartInstance = null;
-                const paperHeight = ref('297mm'); // 响应式高度
+                const activeCollapse = ref(['1', '2', '3', '6']);
+                const pages = ref([{ content: '' }]);
+
+                // 页面尺寸常量 (px) - 基于实际渲染测量
+                const MM_TO_PX = 3.7795; // 更精确的转换
+                const PAGE_HEIGHT_MM = 297;
+                const PAGE_HEIGHT = PAGE_HEIGHT_MM * MM_TO_PX; // A4高度 ≈ 1122px
+                const HEADER_HEIGHT = 76; // 头部高度
+                const CONTENT_PADDING_TOP = 20; // 主内容区顶部padding
+                const CONTENT_PADDING_BOTTOM = 40; // 主内容区底部padding（已增加）
+                const SAFE_BOTTOM_MARGIN = 80; // 底部安全边距，防止内容被切断
+
+                // 侧边栏分页配置
+                const SIDEBAR_ITEM_HEIGHT = 28; // 每个技能/工具/证书项的高度
+                const SIDEBAR_SECTION_HEADER = 45; // 标题+间距高度
+                const SIDEBAR_CONTACT_HEIGHT = 150; // 联系方式区域高度
+                const SIDEBAR_DIVIDER_HEIGHT = 32; // 分割线高度
+                const SIDEBAR_AVAILABLE_FIRST_PAGE = 900; // 第一页侧边栏可用高度（减去头部）
+                const SIDEBAR_AVAILABLE_OTHER_PAGE = 1000; // 后续页侧边栏可用高度
+
+                // 计算侧边栏内容分页
+                const sidebarPagination = ref({ skills: [], tools: [], certs: [] });
+
+                const calculateSidebarPagination = () => {
+                    const result = { skills: [[]], tools: [[]], certs: [[]] };
+
+                    // 第一页已用高度：联系方式
+                    let currentHeight = SIDEBAR_CONTACT_HEIGHT + SIDEBAR_DIVIDER_HEIGHT;
+                    let currentPage = 0;
+                    let availableHeight = SIDEBAR_AVAILABLE_FIRST_PAGE;
+
+                    // 技能部分
+                    currentHeight += SIDEBAR_SECTION_HEADER; // 技能标题
+                    resume.skills.forEach((skill, idx) => {
+                        if (currentHeight + SIDEBAR_ITEM_HEIGHT > availableHeight) {
+                            // 需要换页
+                            currentPage++;
+                            availableHeight = SIDEBAR_AVAILABLE_OTHER_PAGE;
+                            currentHeight = SIDEBAR_SECTION_HEADER; // 新页的标题高度
+                            if (!result.skills[currentPage]) result.skills[currentPage] = [];
+                        }
+                        if (!result.skills[currentPage]) result.skills[currentPage] = [];
+                        result.skills[currentPage].push(skill);
+                        currentHeight += SIDEBAR_ITEM_HEIGHT;
+                    });
+
+                    // 工具部分
+                    currentHeight += SIDEBAR_DIVIDER_HEIGHT + SIDEBAR_SECTION_HEADER;
+                    const toolsStartPage = currentPage;
+                    resume.tools.forEach((tool, idx) => {
+                        if (currentHeight + SIDEBAR_ITEM_HEIGHT > availableHeight) {
+                            currentPage++;
+                            availableHeight = SIDEBAR_AVAILABLE_OTHER_PAGE;
+                            currentHeight = SIDEBAR_SECTION_HEADER;
+                            if (!result.tools[currentPage]) result.tools[currentPage] = [];
+                        }
+                        if (!result.tools[currentPage]) result.tools[currentPage] = [];
+                        result.tools[currentPage].push(tool);
+                        currentHeight += SIDEBAR_ITEM_HEIGHT;
+                    });
+
+                    // 证书部分
+                    currentHeight += SIDEBAR_DIVIDER_HEIGHT + SIDEBAR_SECTION_HEADER;
+                    resume.certs.forEach((cert, idx) => {
+                        if (currentHeight + SIDEBAR_ITEM_HEIGHT > availableHeight) {
+                            currentPage++;
+                            availableHeight = SIDEBAR_AVAILABLE_OTHER_PAGE;
+                            currentHeight = SIDEBAR_SECTION_HEADER;
+                            if (!result.certs[currentPage]) result.certs[currentPage] = [];
+                        }
+                        if (!result.certs[currentPage]) result.certs[currentPage] = [];
+                        result.certs[currentPage].push(cert);
+                        currentHeight += SIDEBAR_ITEM_HEIGHT;
+                    });
+
+                    sidebarPagination.value = result;
+                };
+
+                // 获取指定页的侧边栏内容
+                const getSidebarSkills = (pageIdx) => {
+                    return sidebarPagination.value.skills[pageIdx] || [];
+                };
+
+                const getSidebarTools = (pageIdx) => {
+                    return sidebarPagination.value.tools[pageIdx] || [];
+                };
+
+                const getSidebarCerts = (pageIdx) => {
+                    return sidebarPagination.value.certs[pageIdx] || [];
+                };
 
                 // 响应式数据：简历内容
                 const resume = reactive({
                     base: {
                         name: "张三",
-                        job: "前端开发工程师",
+                        title: "资深Java开发工程师 | 5年经验",
                         phone: "138-0000-0000",
-                        email: "dev@example.com",
-                        summary: "信息与计算科学专业应届生，具备扎实的数学功底与逻辑思维能力。擅长将复杂的业务逻辑转化为优雅的前端交互。对数据可视化（ECharts）及 Vue 生态有深入研究，致力于构建高性能、高可用性的 Web 应用。"
+                        email: "zhangsan@example.com",
+                        location: "上海",
+                        link: "github.com/zhangsan"
                     },
-                    // 雷达图数据
-                    radar: {
-                        'Vue.js': 90,
-                        'JavaScript': 85,
-                        '算法/数学': 80,
-                        'CSS/UI': 75,
-                        '工程化': 70,
-                        '后端基础': 60
-                    },
-                    skills: ["Vue 3", "Element Plus", "TypeScript", "ECharts", "Webpack", "Node.js", "Git", "Tailwind CSS"],
+                    advantages: [
+                        "5年大型互联网公司后端开发经验，主导过日活千万级系统架构设计",
+                        "精通Java生态及微服务架构，具备从0到1搭建高可用系统的能力",
+                        "擅长性能调优与问题排查，曾将核心接口响应时间从200ms优化至30ms"
+                    ],
+                    skills: [
+                        "Java / Spring Boot",
+                        "MySQL / Redis",
+                        "微服务架构",
+                        "分布式系统",
+                        "消息队列 (Kafka)",
+                        "容器化 (Docker/K8s)"
+                    ],
+                    tools: [
+                        "IntelliJ IDEA",
+                        "Git / GitLab",
+                        "Jira / Confluence",
+                        "Jenkins / CI/CD",
+                        "Postman / Swagger"
+                    ],
+                    certs: [
+                        "英语：CET-6 (550分)",
+                        "Oracle认证Java程序员",
+                        "阿里云ACP认证"
+                    ],
+                    works: [
+                        {
+                            company: "阿里巴巴集团",
+                            location: "杭州",
+                            position: "高级Java开发工程师",
+                            time: "2022.06 - 至今",
+                            duties: "主导订单中心微服务重构，将单体应用拆分为12个微服务，系统吞吐量提升300%\n设计并实现分布式事务解决方案，确保跨服务数据一致性，故障率降低至0.01%\n负责团队技术选型和Code Review，指导3名初级工程师成长"
+                        },
+                        {
+                            company: "字节跳动",
+                            location: "北京",
+                            position: "Java开发工程师",
+                            time: "2019.07 - 2022.05",
+                            duties: "参与抖音电商核心交易链路开发，日均处理订单量超500万\n优化MySQL慢查询，将核心接口P99响应时间从500ms降至80ms\n开发自动化运维工具，提升部署效率50%"
+                        }
+                    ],
                     projects: [
                         {
-                            name: "企业级数据可视化大屏系统",
-                            role: "前端负责人",
-                            time: "2024.01 - 2024.04",
-                            desc: "基于 Vue3 + ECharts 开发的响应式数据监控大屏。解决了大量数据渲染导致的卡顿问题，设计了通用的图表组件库，提升了开发效率 40%。运用数学插值算法优化了曲线图的平滑度。为了演示自动分页功能，这里的文字特别加长。当内容超过一页A4纸时，系统会自动计算高度，增加底部的白色区域，确保内容不会溢出到灰色背景上，同时在视觉上保留分页线，方便排版。"
-                        },
-                        {
-                            name: "在线协同文档编辑器",
-                            role: "核心开发者",
-                            time: "2023.09 - 2023.12",
-                            desc: "使用 WebSocket 实现多人实时协作编辑功能。负责 OT (Operational Transformation) 算法的前端实现，解决了多端并发修改的冲突问题。项目获得校级创新大赛一等奖。"
-                        },
-                         {
-                            name: "数值计算方法演示平台",
-                            role: "独立开发",
-                            time: "2023.05 - 2023.07",
-                            desc: "结合专业背景，开发了一个用于演示牛顿迭代法、欧拉法等数值算法的 Web 平台。前端使用 Canvas 进行动态绘制，直观展示算法收敛过程。"
+                            name: "统一支付网关平台",
+                            role: "技术负责人",
+                            time: "2023.01 - 2023.08",
+                            intro: "整合公司多条业务线的支付能力，构建统一的支付网关服务",
+                            desc: "设计高可用架构，实现99.99%的服务可用性，日均处理交易额超10亿\n对接微信、支付宝、银联等8个支付渠道，实现统一的对账与清结算流程\n引入分布式链路追踪，故障定位时间从小时级缩短至分钟级"
                         }
-                    ]
+                    ],
+                    education: {
+                        school: "浙江大学",
+                        time: "2015.09 - 2019.06",
+                        degree: "本科",
+                        major: "计算机科学与技术",
+                        extra: "GPA: 3.8/4.0，专业排名前5%\n获国家奖学金、校三好学生"
+                    }
                 });
 
-                // 计算并更新高度的函数
-                const updatePaperHeight = () => {
-                    nextTick(() => {
-                        const contentEl = document.getElementById('resume-content');
-                        if (!contentEl) return;
-                        
-                        // 获取内容的实际滚动高度
-                        const scrollHeight = contentEl.scrollHeight;
-                        // A4 纸像素高度 (96DPI下 297mm 约为 1123px，但在浏览器中会有缩放，最好用mm计算)
-                        // 这里我们用一种更简单的方法：根据内容高度计算倍数
-                        
-                        // 1mm 约等于 3.78px
-                        const mmToPx = 3.78; 
-                        const pageHeightPx = 297 * mmToPx;
-                        
-                        // 计算需要多少页
-                        let pages = Math.ceil(scrollHeight / pageHeightPx);
-                        if (pages < 1) pages = 1;
+                // 生成内容块的HTML
+                const generateContentBlocks = () => {
+                    const blocks = [];
 
-                        // 设置高度为页数 * 297mm
-                        paperHeight.value = `${pages * 297}mm`;
-                    });
-                };
+                    // 个人优势
+                    if (resume.advantages.length > 0) {
+                        let html = `<section class="mb-5 print-no-break">
+                            <h3 class="main-title">个人优势 / 职业总结</h3>`;
+                        resume.advantages.forEach(adv => {
+                            html += `<div class="advantage-item">
+                                <span class="advantage-bullet">•</span>
+                                <span>${adv}</span>
+                            </div>`;
+                        });
+                        html += `</section>`;
+                        blocks.push({ html, type: 'advantages' });
+                    }
 
-                // 初始化图表
-                const initChart = () => {
-                    const chartDom = document.getElementById('radarChart');
-                    if(!chartDom) return;
-                    
-                    chartInstance = echarts.init(chartDom);
-                    
-                    const option = {
-                        color: ['#3b82f6'],
-                        radar: {
-                            indicator: Object.keys(resume.radar).map(key => ({ name: key, max: 100 })),
-                            radius: '65%',
-                            center: ['50%', '50%'],
-                            splitArea: {
-                                areaStyle: {
-                                    color: ['#f1f5f9', '#fff', '#f1f5f9', '#fff']
-                                }
-                            }
-                        },
-                        series: [
-                            {
-                                type: 'radar',
-                                data: [
-                                    {
-                                        value: Object.values(resume.radar),
-                                        name: '能力维度',
-                                        areaStyle: {
-                                            color: 'rgba(59, 130, 246, 0.2)'
-                                        },
-                                        lineStyle: {
-                                            width: 2
-                                        },
-                                        symbol: 'circle',
-                                        symbolSize: 6
-                                    }
-                                ]
-                            }
-                        ]
-                    };
-                    chartInstance.setOption(option);
-                };
+                    // 工作经历标题
+                    if (resume.works.length > 0) {
+                        blocks.push({
+                            html: `<h3 class="main-title" style="margin-bottom: 12px;">工作经历</h3>`,
+                            type: 'works-title'
+                        });
 
-                // 监听数据变化更新图表
-                const updateChart = () => {
-                    if (chartInstance) {
-                        chartInstance.setOption({
-                            radar: {
-                                indicator: Object.keys(resume.radar).map(key => ({ name: key, max: 100 }))
-                            },
-                            series: [{
-                                data: [{
-                                    value: Object.values(resume.radar),
-                                    name: '能力维度'
-                                }]
-                            }]
+                        // 每个工作经历作为独立块
+                        resume.works.forEach((work, idx) => {
+                            const duties = work.duties.split('\n').filter(d => d.trim());
+                            let html = `<div class="experience-card print-no-break" style="margin-bottom: 18px;">
+                                <div class="experience-header">
+                                    <span class="company-name">${work.company}</span>
+                                    <span class="company-location">${work.location}</span>
+                                </div>
+                                <div class="position-row">
+                                    <span class="position-title">${work.position}</span>
+                                    <span class="position-time">${work.time}</span>
+                                </div>
+                                <ul class="experience-desc">
+                                    ${duties.map(d => `<li>${d}</li>`).join('')}
+                                </ul>
+                            </div>`;
+                            blocks.push({ html, type: 'work-item' });
                         });
                     }
-                };
 
-                // 添加技能
-                const addSkill = () => {
-                    if (newSkill.value.trim()) {
-                        resume.skills.push(newSkill.value.trim());
-                        newSkill.value = '';
-                        updatePaperHeight();
+                    // 项目经验标题
+                    if (resume.projects.length > 0) {
+                        blocks.push({
+                            html: `<h3 class="main-title" style="margin-bottom: 12px;">项目经验</h3>`,
+                            type: 'projects-title'
+                        });
+
+                        // 每个项目作为独立块
+                        resume.projects.forEach((proj, idx) => {
+                            const items = proj.desc.split('\n').filter(d => d.trim());
+                            let html = `<div class="experience-card print-no-break" style="margin-bottom: 18px;">
+                                <div class="experience-header">
+                                    <span class="company-name">${proj.name}</span>
+                                    <span class="company-location">${proj.role} | ${proj.time}</span>
+                                </div>
+                                ${proj.intro ? `<div class="text-gray-500 text-xs italic mb-2">${proj.intro}</div>` : ''}
+                                <ul class="experience-desc">
+                                    ${items.map(d => `<li>${d}</li>`).join('')}
+                                </ul>
+                            </div>`;
+                            blocks.push({ html, type: 'project-item' });
+                        });
                     }
+
+                    // 教育背景
+                    const eduItems = resume.education.extra ? resume.education.extra.split('\n').filter(e => e.trim()) : [];
+                    let eduHtml = `<section class="print-no-break">
+                        <h3 class="main-title">教育背景</h3>
+                        <div class="experience-card">
+                            <div class="experience-header">
+                                <span class="company-name">${resume.education.school}</span>
+                                <span class="company-location">${resume.education.time}</span>
+                            </div>
+                            <div class="position-row">
+                                <span class="position-title">${resume.education.degree} | ${resume.education.major}</span>
+                            </div>
+                            ${eduItems.length > 0 ? `<ul class="experience-desc">${eduItems.map(e => `<li>${e}</li>`).join('')}</ul>` : ''}
+                        </div>
+                    </section>`;
+                    blocks.push({ html: eduHtml, type: 'education' });
+
+                    return blocks;
                 };
 
-                // 删除技能
-                const removeSkill = (index) => {
-                    resume.skills.splice(index, 1);
-                    updatePaperHeight();
+                // 测量单个内容块的高度
+                const measureBlockHeight = (html) => {
+                    const container = document.getElementById('measure-container');
+                    if (!container) return 100;
+
+                    // 清空容器
+                    container.innerHTML = '';
+
+                    // 创建测量元素，完全模拟主内容区
+                    const measureDiv = document.createElement('div');
+                    // 主内容区实际宽度：210mm * 65% - 左右padding(24px*2)
+                    // 210mm ≈ 793.7px, 65% ≈ 515.9px, 减去48px ≈ 467.9px
+                    measureDiv.style.cssText = `
+                        width: 468px;
+                        padding: 0;
+                        font-size: 13px;
+                        line-height: 1.6;
+                        font-family: 'Noto Sans SC', sans-serif;
+                        box-sizing: border-box;
+                    `;
+                    measureDiv.innerHTML = html;
+                    container.appendChild(measureDiv);
+
+                    // 强制重排后获取高度
+                    void measureDiv.offsetHeight;
+                    const height = measureDiv.getBoundingClientRect().height;
+
+                    return Math.ceil(height) + 5; // 额外增加5px安全边距
                 };
 
-                // 添加项目
+                // 智能分页算法
+                const paginateContent = () => {
+                    // 先计算侧边栏分页
+                    calculateSidebarPagination();
+
+                    const blocks = generateContentBlocks();
+                    const pagesResult = [];
+
+                    // 计算实际可用高度（更保守的计算）
+                    // A4高度: 297mm ≈ 1122px
+                    // 第一页: 1122 - 76(头部) - 20(顶部padding) - 40(底部padding) - 80(安全边距) = 906px
+                    // 后续页: 1122 - 20(顶部padding) - 40(底部padding) - 80(安全边距) = 982px
+                    const firstPageAvailable = 900; // 保守估计，确保不溢出
+                    const otherPageAvailable = 980;
+
+                    let currentPage = { content: '', height: 0 };
+                    let currentPageIndex = 0;
+                    let availableHeight = firstPageAvailable;
+
+                    blocks.forEach((block, blockIdx) => {
+                        const blockHeight = measureBlockHeight(block.html);
+
+                        // 检查是否需要换页
+                        if (currentPage.height > 0 && currentPage.height + blockHeight > availableHeight) {
+                            // 当前页已有内容且放不下新块，保存当前页
+                            pagesResult.push({ content: currentPage.content });
+
+                            // 开始新页
+                            currentPageIndex++;
+                            availableHeight = otherPageAvailable;
+                            currentPage = { content: block.html, height: blockHeight };
+                        } else {
+                            // 可以放下（或是当前页第一个块），追加到当前页
+                            currentPage.content += block.html;
+                            currentPage.height += blockHeight;
+                        }
+                    });
+
+                    // 添加最后一页
+                    if (currentPage.content) {
+                        pagesResult.push({ content: currentPage.content });
+                    }
+
+                    // 确保至少有一页
+                    if (pagesResult.length === 0) {
+                        pagesResult.push({ content: '' });
+                    }
+
+                    pages.value = pagesResult;
+                };
+
+                // 优势操作
+                const addAdvantage = () => {
+                    resume.advantages.push("新的核心竞争力描述");
+                };
+                const removeAdvantage = (idx) => {
+                    resume.advantages.splice(idx, 1);
+                };
+
+                // 技能操作
+                const addSkill = () => {
+                    resume.skills.push("新技能");
+                };
+                const removeSkill = (idx) => {
+                    resume.skills.splice(idx, 1);
+                };
+
+                // 工具操作
+                const addTool = () => {
+                    resume.tools.push("新工具");
+                };
+                const removeTool = (idx) => {
+                    resume.tools.splice(idx, 1);
+                };
+
+                // 证书操作
+                const addCert = () => {
+                    resume.certs.push("新证书/语言");
+                };
+                const removeCert = (idx) => {
+                    resume.certs.splice(idx, 1);
+                };
+
+                // 工作经历操作
+                const addWork = () => {
+                    resume.works.unshift({
+                        company: "公司名称",
+                        location: "城市",
+                        position: "职位名称",
+                        time: "开始时间 - 结束时间",
+                        duties: "主要成就1\n主要成就2"
+                    });
+                };
+                const removeWork = (idx) => {
+                    resume.works.splice(idx, 1);
+                };
+
+                // 项目操作
                 const addProject = () => {
                     resume.projects.unshift({
-                        name: "新项目",
-                        role: "角色",
-                        time: "2024.xx - 2024.xx",
-                        desc: "请描述你的项目贡献..."
+                        name: "项目名称",
+                        role: "项目角色",
+                        time: "项目时间",
+                        intro: "项目背景介绍",
+                        desc: "核心任务1\n核心任务2"
                     });
-                    updatePaperHeight();
                 };
-
-                // 删除项目
-                const removeProject = (index) => {
-                    resume.projects.splice(index, 1);
-                    updatePaperHeight();
+                const removeProject = (idx) => {
+                    resume.projects.splice(idx, 1);
                 };
 
                 // 打印功能
                 const printResume = () => {
                     ElMessage.success('正在准备打印...');
-                    // 打印前强制重算一次高度
-                    updatePaperHeight();
                     setTimeout(() => {
                         window.print();
                     }, 500);
                 };
 
-                // 监听整个 resume 对象的变化，触发高度重新计算
+                // 监听整个 resume 对象的变化，重新分页
                 watch(resume, () => {
-                    updatePaperHeight();
+                    nextTick(() => {
+                        paginateContent();
+                    });
                 }, { deep: true });
 
                 onMounted(() => {
                     nextTick(() => {
-                        initChart();
-                        updatePaperHeight();
+                        paginateContent();
                     });
-                    
+
                     window.addEventListener('resize', () => {
-                        chartInstance && chartInstance.resize();
-                        updatePaperHeight();
+                        paginateContent();
                     });
                 });
 
                 return {
                     activeCollapse,
                     resume,
-                    newSkill,
-                    paperHeight,
-                    updateChart,
+                    pages,
+                    getSidebarSkills,
+                    getSidebarTools,
+                    getSidebarCerts,
+                    addAdvantage,
+                    removeAdvantage,
                     addSkill,
                     removeSkill,
+                    addTool,
+                    removeTool,
+                    addCert,
+                    removeCert,
+                    addWork,
+                    removeWork,
                     addProject,
                     removeProject,
                     printResume
@@ -569,6 +1027,4 @@
         app.mount('#app');
     </script>
 </body>
-
 </html>
-
